@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кто тут главный? Тренажёр: члены предложения</title>
+<style>
+:root{
+  --bg:#F8FAFC; --card:#FFFFFF; --text:#0F172A; --muted:#475569; --accent:#1E293B;
+  --ok:#15803D; --ok-bg:#DCFCE7; --bad:#B91C1C; --bad-bg:#FEE2E2; --hl:#FDE68A;
+  --line:#CBD5E1; --chip:#EEF2F7;
+  --podl:#0369A1; --skaz:#BE123C; --dop:#047857; --opr:#7E22CE; --obst:#B45309;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0B1220; --card:#111A2E; --text:#E2E8F0; --muted:#94A3B8; --accent:#E2E8F0;
+    --ok:#4ADE80; --ok-bg:#14361F; --bad:#F87171; --bad-bg:#3B1515; --hl:#5B4A12;
+    --line:#334155; --chip:#1C2740;
+    --podl:#38BDF8; --skaz:#FB7185; --dop:#34D399; --opr:#C084FC; --obst:#FBBF24; }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font-family:"Segoe UI",Calibri,Arial,system-ui,sans-serif;font-size:20px;line-height:1.4}
+body{-webkit-tap-highlight-color:transparent}
+.wrap{max-width:760px;margin:0 auto;padding:16px 16px 40px}
+.stripe{height:8px;border-radius:4px;margin-bottom:14px;
+  background:linear-gradient(90deg,var(--podl) 0 20%,var(--skaz) 20% 40%,var(--dop) 40% 60%,var(--opr) 60% 80%,var(--obst) 80%)}
+h1{font-size:30px;line-height:1.2;margin:8px 0 8px}
+h2{font-size:24px;margin:0 0 10px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:20px;margin:14px 0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:18px}
+.bar{height:12px;background:var(--chip);border-radius:6px;overflow:hidden;margin:8px 0 4px}
+.bar>div{height:100%;background:var(--accent);width:0;transition:width .3s}
+.streak{font-weight:700;color:var(--obst)}
+.q{font-size:22px;font-weight:700;margin:4px 0 12px}
+.sent{font-size:24px;background:var(--chip);border-radius:14px;padding:14px 16px;margin:0 0 14px}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:60px;padding:12px 16px;
+  margin:10px 0;border-radius:16px;border:2px solid var(--line);background:var(--card);color:var(--text);
+  font:inherit;font-size:21px;cursor:pointer;text-align:center;touch-action:manipulation}
+.btn:active{transform:scale(.99)}
+.btn.main{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:700}
+.btn.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--text)}
+.btn.bad{background:var(--bad-bg);border-color:var(--bad)}
+.btn[disabled]{opacity:.55;cursor:default}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row2 .btn{margin:0}
+.words{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.w{min-height:56px;min-width:56px;padding:10px 14px;border-radius:14px;border:2px solid var(--line);
+  background:var(--card);color:var(--text);font:inherit;font-size:22px;cursor:pointer;touch-action:manipulation}
+.w.sel{background:var(--hl);border-color:var(--obst)}
+.w.ok{background:var(--ok-bg);border-color:var(--ok)}
+.w.bad{background:var(--bad-bg);border-color:var(--bad)}
+.cm{display:flex;flex-wrap:wrap;align-items:center;row-gap:8px}
+.cm .word{font-size:24px;padding:0 2px}
+.gap{width:44px;min-height:56px;margin:0 2px;border-radius:12px;border:2px dashed var(--line);background:transparent;
+  color:var(--text);font:inherit;font-size:30px;font-weight:700;cursor:pointer;line-height:1;touch-action:manipulation}
+.gap.on{border-style:solid;border-color:var(--obst);background:var(--hl)}
+.gap.ok{border-style:solid;border-color:var(--ok);background:var(--ok-bg)}
+.gap.bad{border-style:solid;border-color:var(--bad);background:var(--bad-bg)}
+.pool{display:flex;flex-wrap:wrap;gap:10px;min-height:66px;padding:10px;border-radius:14px;border:2px dashed var(--line);margin-bottom:12px}
+.chip{min-height:56px;padding:10px 14px;border-radius:14px;border:2px solid var(--line);background:var(--card);
+  color:var(--text);font:inherit;font-size:20px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.chip.sel{background:var(--hl);border-color:var(--obst)}
+.chip.bad{background:var(--bad-bg);border-color:var(--bad)}
+.chip.ok{background:var(--ok-bg);border-color:var(--ok)}
+.groups{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.group{min-height:150px;border-radius:16px;border:3px solid var(--line);padding:10px;display:flex;flex-direction:column;gap:8px;cursor:pointer}
+.group h3{margin:0 0 4px;font-size:19px;text-align:center;hyphens:manual;overflow-wrap:anywhere}
+.group.hover{background:var(--chip)}
+.g-dop{border-color:var(--dop)} .g-dop h3{color:var(--dop)}
+.g-obst{border-color:var(--obst)} .g-obst h3{color:var(--obst)}
+.match{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.match .btn{margin:0;font-size:19px;min-height:64px}
+.pair0{box-shadow:inset 0 0 0 4px var(--podl)} .pair1{box-shadow:inset 0 0 0 4px var(--skaz)}
+.pair2{box-shadow:inset 0 0 0 4px var(--dop)} .pair3{box-shadow:inset 0 0 0 4px var(--opr)}
+.pair4{box-shadow:inset 0 0 0 4px var(--obst)}
+.sel-b{background:var(--hl)!important}
+.answer{display:flex;flex-wrap:wrap;gap:10px;min-height:76px;padding:10px;border-radius:14px;border:2px solid var(--accent);margin:12px 0}
+.ph{color:var(--muted);align-self:center}
+.fb{border-radius:16px;padding:14px 16px;margin-top:12px;font-size:20px}
+.fb.ok{background:var(--ok-bg);border:2px solid var(--ok)}
+.fb.bad{background:var(--bad-bg);border:2px solid var(--bad)}
+.fb b{display:block;margin-bottom:4px}
+.center{text-align:center}
+.big{font-size:56px;line-height:1.1;margin:6px 0}
+.stars{font-size:54px;letter-spacing:6px}
+.lvl{font-size:64px}
+.legend{display:grid;gap:6px;font-size:18px;color:var(--muted)}
+.k-podl{color:var(--podl);font-weight:700} .k-skaz{color:var(--skaz);font-weight:700}
+.k-dop{color:var(--dop);font-weight:700} .k-opr{color:var(--opr);font-weight:700} .k-obst{color:var(--obst);font-weight:700}
+.ghost{position:fixed;pointer-events:none;z-index:50;opacity:.9;transform:translate(-50%,-50%) rotate(-2deg);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.small{font-size:17px;color:var(--muted)}
+@media (max-width:420px){ html,body{font-size:19px} .sent{font-size:22px} .card{padding:14px} .group{padding:8px} .chip{font-size:18px;padding:8px 10px} .match .btn{font-size:17px;padding:8px} h1{font-size:26px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="stripe"></div>
+  <div id="app"></div>
+</div>
+<script>
+"use strict";
+/* ===== Задания ===== */
+const LEVELS = [
+  {name:"Уровень 1. Найди главного", icon:"🎯",
+   intro:"Задача простая: найти, кто в предложении главный. Спойлер: не всегда тот, кто стоит первым.",
+   outro:"Уровень пройден! Подлежащие больше не прячутся у тебя за спиной сказуемого."},
+  {name:"Уровень 2. Сказуемое из двух слов", icon:"🧩",
+   intro:"Сказуемое иногда приходит не одно, а с другом. Подчёркиваем обоих.",
+   outro:"Отлично! Теперь «хочу спать» для тебя не только жизненная позиция, но и составное сказуемое."},
+  {name:"Уровень 3. Дополнение или обстоятельство", icon:"🧭",
+   intro:"Предлог тут ничего не решает. Решает вопрос, который ты задаёшь от слова.",
+   outro:"Предлоги пытались тебя запутать, но не вышло."},
+  {name:"Уровень 4. Финальный босс", icon:"👾",
+   intro:"Последний уровень: всё сразу и пара ловушек. Ты готов(а).",
+   outro:"Босс повержен! Можно идти смотреть результат."}
+];
+
+const TASKS = [
+ // ---- Уровень 1
+ {id:1, lv:0, type:"tap", topic:"Подлежащее",
+  q:"Нажми на подлежащее.", words:["Вчера","мне","написал","старый","друг."], answer:[4],
+  hint:"Спроси от сказуемого: написал кто? — друг. «Мне» — кому?, это дополнение.",
+  why:"Написал (кто?) друг. Подлежащее не обязано стоять первым."},
+ {id:2, lv:0, type:"choice", topic:"Грамматическая основа",
+  q:"Какая грамматическая основа в предложении?", sent:"Под кроватью спал кот.",
+  options:["кот спал","под кроватью спал","спал","кроватью кот"], answer:"кот спал",
+  hint:"Основа — это подлежащее и сказуемое вместе. Что делал? — спал. Кто спал? — кот.",
+  why:"Основа: кот (подлежащее) спал (сказуемое)."},
+ {id:3, lv:0, type:"tap", topic:"Сказуемое",
+  q:"Нажми на сказуемое.", words:["Наш","класс","выиграл","школьный","турнир."], answer:[2],
+  hint:"Сказуемое отвечает на вопрос «что сделал?» и говорит, что произошло с подлежащим.",
+  why:"Класс (что сделал?) выиграл — это сказуемое."},
+ {id:4, lv:0, type:"tf", topic:"Подлежащее",
+  q:"Верно или неверно?", sent:"В предложении «Мы с Олей сделали проект» подлежащее — «мы с Олей».",
+  answer:true,
+  hint:"Подлежащим может быть сочетание слов: «мы с Олей», «брат с сестрой».",
+  why:"Верно: проект сделали двое, и подлежащее — всё сочетание «мы с Олей»."},
+ {id:5, lv:0, type:"choice", topic:"Подлежащее",
+  q:"Какое слово — подлежащее?", sent:"Ключи от квартиры забыл папа.",
+  options:["папа","ключи","квартиры","забыл"], answer:"папа",
+  hint:"Спроси от сказуемого «забыл»: кто забыл? Ключи никого не забывали.",
+  why:"Забыл (кто?) папа. А «ключи» — забыл (что?), это дополнение."},
+ // ---- Уровень 2
+ {id:6, lv:1, type:"choice", topic:"Составное сказуемое",
+  q:"Найди сказуемое целиком.", sent:"Я начал учить английский.",
+  options:["начал учить","начал","учить английский","я начал"], answer:"начал учить",
+  hint:"«Начал» что делать? Одно «начал» ничего не сообщает, нужно и второе слово.",
+  why:"Сказуемое составное: начал учить. Оба слова подчёркиваем двумя чертами."},
+ {id:7, lv:1, type:"tapmulti", topic:"Составное сказуемое",
+  q:"Нажми на ВСЕ слова сказуемого, потом «Проверить».", words:["Сестра","стала","отличным","вратарём."], answer:[1,3],
+  hint:"Сестра стала кем? Слово «отличным» отвечает на вопрос «каким?», это определение.",
+  why:"Сказуемое: стала вратарём. «Отличным» — определение к слову «вратарём»."},
+ {id:8, lv:1, type:"tf", topic:"Составное сказуемое",
+  q:"Верно или неверно?", sent:"Сказуемое всегда состоит из одного слова.", answer:false,
+  hint:"Вспомни: «хочу спать», «стал капитаном».",
+  why:"Неверно: бывают составные сказуемые: «хочу спать», «стал капитаном»."},
+ {id:9, lv:1, type:"comma", topic:"Две основы",
+  q:"Здесь две основы. Нажми туда, где нужна запятая.", words:["Пошёл","снег","и","мы","побежали","на","улицу."], answer:1,
+  hint:"Найди обе основы: «снег пошёл» и «мы побежали». Между частями перед «и» ставим запятую.",
+  why:"Пошёл снег, и мы побежали на улицу. Две основы — две части, между ними запятая."},
+ {id:10, lv:1, type:"order", topic:"Члены предложения",
+  q:"Собери предложение по схеме: определение → подлежащее → сказуемое → дополнение.",
+  tokens:["прячет","хомяк","семечки","Хитрый"], answer:["Хитрый","хомяк","прячет","семечки"],
+  hint:"Какой хомяк? — хитрый (определение). Хомяк что делает? — прячет. Прячет что? — семечки.",
+  why:"Хитрый хомяк прячет семечки."},
+ // ---- Уровень 3
+ {id:11, lv:2, type:"sort", topic:"Дополнение или обстоятельство",
+  q:"Разложи по группам: перетащи или нажми на слово, потом на группу. Вопрос задавай от глагола.",
+  groups:[{key:"dop",name:"Дополнение"},{key:"obst",name:"Обстоя­тельство"}],
+  items:[{t:"мечтаю о собаке",g:"dop"},{t:"написал бабушке",g:"dop"},{t:"поспорил с другом",g:"dop"},
+         {t:"гуляли в парке",g:"obst"},{t:"пришёл после уроков",g:"obst"},{t:"уехали на дачу",g:"obst"}],
+  hint:"Падежный вопрос (о ком? кому? с кем?) — дополнение. Где? куда? когда? — обстоятельство.",
+  why:"Мечтаю (о ком?), написал (кому?), поспорил (с кем?) — дополнения. Гуляли (где?), пришёл (когда?), уехали (куда?) — обстоятельства."},
+ {id:12, lv:2, type:"choice", topic:"Дополнение или обстоятельство",
+  q:"Чем является «о сериале»?", sent:"Мы весь вечер говорили о сериале.",
+  options:["дополнение","обстоятельство","определение"], answer:"дополнение",
+  hint:"Говорили о чём? Это вопрос падежа, а не «где?» или «когда?».",
+  why:"Говорили (о чём?) о сериале — это дополнение, хоть и с предлогом."},
+ {id:13, lv:2, type:"choice", topic:"Дополнение или обстоятельство",
+  q:"Чем является «под диваном»?", sent:"Кот спрятался под диваном.",
+  options:["обстоятельство","дополнение","подлежащее"], answer:"обстоятельство",
+  hint:"Спрятался где? Вопрос «где?» задают к обстоятельству.",
+  why:"Спрятался (где?) под диваном — это обстоятельство места."},
+ {id:14, lv:2, type:"match", topic:"Члены предложения",
+  q:"Соедини член предложения с его вопросами: нажми слева, потом справа.",
+  pairs:[["Подлежащее","кто? что?"],["Сказуемое","что делает? что сделал?"],["Дополнение","кого? чему? о чём?"],
+         ["Определение","какой? чей?"],["Обстоятельство","где? когда? как?"]],
+  hint:"Определение описывает предмет (какой?), обстоятельство — действие (где? когда? как?).",
+  why:"Все пары на месте."},
+ // ---- Уровень 4
+ {id:15, lv:3, type:"choice", topic:"Определение",
+  q:"Чем является «соседа»?", sent:"Я взял ручку соседа.",
+  options:["определение","дополнение","обстоятельство"], answer:"определение",
+  hint:"Задай вопрос от слова «ручку»: ручку чью?",
+  why:"Ручку (чью?) соседа — это определение, хотя и не прилагательное."},
+ {id:16, lv:3, type:"error", topic:"Дополнение или обстоятельство",
+  q:"Робот разобрал предложение. Нажми на строку с ошибкой.", sent:"Вечером мой брат играл в шахматы.",
+  options:["вечером — обстоятельство","мой — определение","брат — подлежащее","играл — сказуемое","в шахматы — обстоятельство"],
+  answer:"в шахматы — обстоятельство",
+  hint:"Проверь вопросы: играл когда? играл во что?",
+  why:"Играл (во что?) в шахматы — это дополнение, а не обстоятельство."},
+ {id:17, lv:3, type:"comma", topic:"Две основы",
+  q:"Нажми туда, где нужна запятая.", words:["Звонок","прозвенел","но","учитель","ещё","объяснял","тему."], answer:1,
+  hint:"Две основы: «звонок прозвенел» и «учитель объяснял». Перед «но» запятая.",
+  why:"Звонок прозвенел, но учитель ещё объяснял тему. Две основы и союз «но» — нужна запятая."},
+ {id:18, lv:3, type:"tf", topic:"Подлежащее",
+  q:"Верно или неверно?", sent:"В предложении «У меня есть кот» подлежащее — «кот».", answer:true,
+  hint:"Сказуемое здесь «есть». Спроси: есть кто?",
+  why:"Верно: есть (кто?) кот. «У меня» — с предлогом, подлежащим быть не может."},
+ {id:19, lv:3, type:"tapmulti", topic:"Грамматическая основа",
+  q:"Нажми на все слова грамматической основы, потом «Проверить».",
+  words:["Мои","друзья","решили","пойти","в","кино."], answer:[1,2,3],
+  hint:"Подлежащее — «друзья». Решили что сделать? Сказуемое из двух слов.",
+  why:"Основа: друзья (подлежащее) решили пойти (составное сказуемое)."}
+];
+
+const PRAISE = ["Точно в цель! 🎯","Красиво! 😎","Вот это разбор! 🔥","Чётко! ✅","Как по учебнику, только круче 📘",
+  "Мозг на максималках 🧠","Робот завидует 🤖","Засчитано! 🏅","Так держать! 💪","Идеально! ✨"];
+const OOPS = ["Почти! Попробуй ещё раз.","Не-а, но ты близко.","Ловушка сработала 😅 Ещё попытка!","Хм, перепроверь вопрос."];
+
+/* ===== Состояние ===== */
+let S;
+function fresh(){ return {mode:"main", queue:[], idx:0, first:{}, tried:{}, streak:0, best:0, fixed:false}; }
+const $app = document.getElementById("app");
+const rnd = a => a[Math.floor(Math.random()*a.length)];
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function shuffleNot(a){ if(a.length<2) return a.slice(); let b; do{ b=shuffle(a);}while(b.every((x,i)=>x===a[i])); return b; }
+function h(tag, attrs, ...kids){ const e=document.createElement(tag);
+  for(const k in (attrs||{})){ const v=attrs[k]; if(k==="class") e.className=v; else if(k.startsWith("on")) e.addEventListener(k.slice(2),v); else if(v!==false&&v!=null) e.setAttribute(k,v===true?"":v); }
+  for(const c of kids.flat()){ if(c==null) continue; e.append(c.nodeType?c:document.createTextNode(c)); } return e; }
+
+/* ===== Экраны ===== */
+function start(){
+  S = fresh();
+  $app.innerHTML="";
+  $app.append(
+    h("h1",null,"Кто тут главный? 👑"),
+    h("p",{class:"small"},"Тренажёр «Члены предложения и грамматическая основа»"),
+    h("div",{class:"card"},
+      h("p",null,"Тебя ждут 4 уровня и 19 заданий: нажимай, выбирай, перетаскивай, ставь запятые."),
+      h("p",null,"Ошибся — получишь подсказку и попробуешь ещё раз. В конце — звёзды и работа над ошибками."),
+      h("div",{class:"legend"},
+        h("div",null,h("span",{class:"k-podl"},"Подлежащее")," — кто? что?"),
+        h("div",null,h("span",{class:"k-skaz"},"Сказуемое")," — что делает? что сделал? каков?"),
+        h("div",null,h("span",{class:"k-dop"},"Дополнение")," — вопросы падежей: кого? чему? о чём?"),
+        h("div",null,h("span",{class:"k-opr"},"Определение")," — какой? чей?"),
+        h("div",null,h("span",{class:"k-obst"},"Обстоятельство")," — где? куда? когда? как? почему?")
+      )),
+    h("button",{class:"btn main",id:"go",onclick:()=>{ S.queue=TASKS.map(t=>t.id); levelScreen(0); }},"Начать ▶")
+  );
+}
+function levelScreen(lv){
+  const L=LEVELS[lv];
+  $app.innerHTML="";
+  $app.append(h("div",{class:"card center"},
+    h("div",{class:"lvl"},L.icon), h("h2",null,L.name), h("p",null,L.intro),
+    h("button",{class:"btn main",id:"go",onclick:()=>showTask()},"Поехали!")));
+}
+function levelDone(lv){
+  const L=LEVELS[lv];
+  $app.innerHTML="";
+  $app.append(h("div",{class:"card center"},
+    h("div",{class:"lvl"},"🏁"), h("h2",null,L.name+": готово"), h("p",null,L.outro),
+    h("button",{class:"btn main",id:"go",onclick:()=> lv+1<LEVELS.length ? levelScreen(lv+1) : results()},
+      lv+1<LEVELS.length ? "Следующий уровень ▶" : "Смотреть результат ▶")));
+}
+function header(t){
+  const total=S.queue.length, n=S.idx+1;
+  const title = S.mode==="fix" ? "Работа над ошибками" : LEVELS[t.lv].name;
+  return [h("div",{class:"top"}, h("span",null,title), h("span",null,"Задание "+n+" из "+total)),
+    h("div",{class:"bar"},h("div",{style:"width:"+Math.round((S.idx)/total*100)+"%"})),
+    h("div",{class:"top"},h("span",null,"Тема: "+t.topic), h("span",{class:"streak"}, S.streak>=2 ? "Серия: "+S.streak+" 🔥" : ""))];
+}
+function showTask(){
+  const t = TASKS.find(x=>x.id===S.queue[S.idx]);
+  $app.innerHTML="";
+  const card=h("div",{class:"card",id:"task","data-id":t.id,"data-type":t.type});
+  const fb=h("div",{id:"fb"});
+  const ctx={t, card, fb, done:false,
+    success(){ if(ctx.done) return; ctx.done=true; onAnswer(t,true,fb); },
+    fail(){ onAnswer(t,false,fb); }};
+  card.append(h("div",{class:"q"},t.q));
+  if(t.sent) card.append(h("div",{class:"sent"},t.sent));
+  RENDER[t.type](ctx);
+  card.append(fb);
+  $app.append(...header(t), card);
+  window.scrollTo(0,0);
+}
+function onAnswer(t, ok, fb){
+  if(S.tried[t.id]===undefined){ S.tried[t.id]=true; if(S.mode==="main") S.first[t.id]=ok; }
+  fb.innerHTML="";
+  if(ok){
+    S.streak++; S.best=Math.max(S.best,S.streak);
+    const last = S.idx+1>=S.queue.length;
+    const next = TASKS.find(x=>x.id===S.queue[S.idx+1]);
+    const lvEnd = S.mode==="main" && (last || next.lv!==t.lv);
+    fb.className="fb ok";
+    fb.append(h("b",null,rnd(PRAISE)), h("span",null,t.why),
+      h("button",{class:"btn main",id:"next",onclick:()=>{
+        S.idx++;
+        if(S.mode==="main"){ lvEnd ? levelDone(t.lv) : showTask(); }
+        else { last ? fixDone() : showTask(); }
+      }}, "Дальше ▶"));
+    setTimeout(()=>document.getElementById("next")?.scrollIntoView({behavior:"smooth",block:"center"}),50);
+  } else {
+    S.streak=0;
+    fb.className="fb bad";
+    fb.append(h("b",null,rnd(OOPS)), h("span",null,"Подсказка: "+t.hint));
+    setTimeout(()=>fb.scrollIntoView({behavior:"smooth",block:"nearest"}),50);
+  }
+}
+function results(){
+  const total=TASKS.length, good=TASKS.filter(t=>S.first[t.id]).length;
+  const pct=Math.round(good/total*100);
+  const stars = pct>=90?3:(pct>=60?2:1);
+  const wrong = TASKS.filter(t=>!S.first[t.id]);
+  const topics=[...new Set(wrong.map(t=>t.topic))];
+  const d=new Date(); const date=d.toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"});
+  $app.innerHTML="";
+  const card=h("div",{class:"card center",id:"result"},
+    h("h2",null,"Итог тренажёра «Члены предложения»"),
+    h("div",{class:"stars",id:"stars","data-stars":stars},"⭐".repeat(stars)+"☆".repeat(3-stars)),
+    h("div",{class:"big",id:"score"},good+" из "+total),
+    h("p",null,"правильно с первого раза ("+pct+"%)"),
+    h("p",null,"Лучшая серия: "+S.best+" 🔥"),
+    topics.length ? h("p",null,"Повторить: "+topics.join(", ")) : h("p",null,"Ни одной ошибки. Ты финальный босс этой темы! 👑"),
+    S.fixed ? h("p",{class:"k-dop"},"✅ Работа над ошибками выполнена") : null,
+    h("p",{class:"small"},date),
+    h("p",null,h("b",null,"📸 Сделай скриншот и отправь учителю")));
+  $app.append(card);
+  if(wrong.length && !S.fixed){
+    $app.append(h("button",{class:"btn main",id:"fix",onclick:()=>{
+      S.mode="fix"; S.queue=shuffle(wrong.map(t=>t.id)); S.idx=0; S.tried={}; S.streak=0; showTask(); }},
+      "Работа над ошибками ("+wrong.length+") ▶"));
+  }
+  $app.append(h("button",{class:"btn",id:"restart",onclick:start},"Начать заново ↺"));
+}
+function fixDone(){ S.fixed=true; S.mode="main"; results(); }
+
+/* ===== Типы заданий ===== */
+const RENDER = {
+ choice(ctx){ optionList(ctx, shuffle(ctx.t.options)); },
+ error(ctx){ optionList(ctx, ctx.t.options); },
+ tf(ctx){
+  const box=h("div",{class:"row2"});
+  for(const [lab,val] of [["✔ Верно",true],["✘ Неверно",false]]){
+    const b=h("button",{class:"btn opt","data-v":String(val),onclick:()=>{
+      if(ctx.done) return;
+      box.querySelectorAll(".btn").forEach(x=>x.classList.remove("bad"));
+      if(val===ctx.t.answer){ b.classList.add("ok"); ctx.success(); } else { b.classList.add("bad"); ctx.fail(); } }},lab);
+    box.append(b);
+  }
+  ctx.card.append(box);
+ },
+ tap(ctx){
+  const box=h("div",{class:"words sent"});
+  ctx.t.words.forEach((w,i)=>{ const b=h("button",{class:"w","data-i":i,onclick:()=>{
+     if(ctx.done) return;
+     box.querySelectorAll(".w").forEach(x=>x.classList.remove("bad"));
+     if(ctx.t.answer.includes(i)){ b.classList.add("ok"); ctx.success(); } else { b.classList.add("bad"); ctx.fail(); } }}, w);
+    box.append(b); });
+  ctx.card.append(box);
+ },
+ tapmulti(ctx){
+  const box=h("div",{class:"words sent"}); const sel=new Set();
+  ctx.t.words.forEach((w,i)=>{ const b=h("button",{class:"w","data-i":i,onclick:()=>{
+     if(ctx.done) return;
+     box.querySelectorAll(".w").forEach(x=>x.classList.remove("bad"));
+     sel.has(i)?sel.delete(i):sel.add(i); b.classList.toggle("sel"); }}, w); box.append(b); });
+  const chk=h("button",{class:"btn main",id:"check",onclick:()=>{
+     if(ctx.done) return;
+     const a=ctx.t.answer; const ok = sel.size===a.length && a.every(i=>sel.has(i));
+     if(ok){ box.querySelectorAll(".w.sel").forEach(x=>{x.classList.remove("sel");x.classList.add("ok");}); chk.disabled=true; ctx.success(); }
+     else { box.querySelectorAll(".w.sel").forEach(x=>{ if(!a.includes(+x.dataset.i)) x.classList.add("bad"); }); ctx.fail(); } }},"Проверить");
+  ctx.card.append(box, chk);
+ },
+ comma(ctx){
+  const box=h("div",{class:"cm sent"}); let cur=null;
+  ctx.t.words.forEach((w,i)=>{
+    box.append(h("span",{class:"word"},w));
+    if(i<ctx.t.words.length-1){
+      const g=h("button",{class:"gap","data-i":i,"aria-label":"место после слова "+w,onclick:()=>{
+        if(ctx.done) return;
+        box.querySelectorAll(".gap").forEach(x=>{x.classList.remove("on","bad");x.textContent="";});
+        g.textContent=","; cur=i;
+        if(i===ctx.t.answer){ g.classList.add("ok"); ctx.success(); } else { g.classList.add("bad"); ctx.fail(); } }},"");
+      box.append(g);
+    }
+  });
+  ctx.card.append(box);
+ },
+ order(ctx){
+  const t=ctx.t; const pool=h("div",{class:"pool",id:"pool"}); const ans=h("div",{class:"answer",id:"ans"});
+  const ph=h("span",{class:"ph"},"Нажимай на слова по порядку");
+  const picked=[];
+  function draw(){ ans.innerHTML=""; if(!picked.length) ans.append(ph);
+    picked.forEach((w,k)=>ans.append(h("button",{class:"chip",onclick:()=>{ if(ctx.done) return; picked.splice(k,1); pool.append(mk(w)); draw(); }},w))); }
+  function mk(w){ const b=h("button",{class:"chip","data-w":w,onclick:()=>{ if(ctx.done) return; b.remove(); picked.push(w); draw(); }},w); return b; }
+  shuffleNot(t.tokens).forEach(w=>pool.append(mk(w)));
+  draw();
+  const chk=h("button",{class:"btn main",id:"check",onclick:()=>{
+    if(ctx.done) return;
+    if(picked.length<t.answer.length){ ctx.fb.className="fb bad"; ctx.fb.innerHTML=""; ctx.fb.append(h("b",null,"Используй все слова 🙂")); return; }
+    if(picked.every((w,k)=>w===t.answer[k])){ ans.querySelectorAll(".chip").forEach(x=>x.classList.add("ok")); chk.disabled=true; ctx.success(); }
+    else { ctx.fail(); picked.splice(0).forEach(w=>pool.append(mk(w))); draw(); } }},"Проверить");
+  ctx.card.append(pool, ans, chk);
+ },
+ sort(ctx){
+  const t=ctx.t; const pool=h("div",{class:"pool",id:"pool"}); const groups=h("div",{class:"groups"});
+  let selected=null; const place={};
+  const gEls={};
+  t.groups.forEach(g=>{ const el=h("div",{class:"group g-"+g.key,"data-g":g.key,onclick:()=>{ if(selected&&!ctx.done){ moveTo(selected,g.key); } }}, h("h3",null,g.name));
+    gEls[g.key]=el; groups.append(el); });
+  function moveTo(chip,key){ chip.classList.remove("sel","bad"); selected=null;
+    if(key){ gEls[key].append(chip); place[chip.dataset.t]=key; } else { pool.append(chip); delete place[chip.dataset.t]; } }
+  shuffle(t.items).forEach(it=>{
+    const c=h("div",{class:"chip",role:"button",tabindex:"0","data-t":it.t},it.t);
+    let sx,sy,drag=false,ghost=null,moved=false;
+    c.addEventListener("pointerdown",e=>{ if(ctx.done) return; sx=e.clientX; sy=e.clientY; drag=true; moved=false; c.setPointerCapture(e.pointerId); });
+    c.addEventListener("pointermove",e=>{ if(!drag) return;
+      if(!moved && Math.hypot(e.clientX-sx,e.clientY-sy)>8){ moved=true; ghost=c.cloneNode(true); ghost.classList.add("ghost"); document.body.append(ghost); }
+      if(moved){ ghost.style.left=e.clientX+"px"; ghost.style.top=e.clientY+"px";
+        const over=document.elementFromPoint(e.clientX,e.clientY)?.closest(".group");
+        Object.values(gEls).forEach(g=>g.classList.toggle("hover",g===over));
+        if(e.clientY>innerHeight-70) scrollBy(0,14); else if(e.clientY<70) scrollBy(0,-14); } });
+    const end=e=>{ if(!drag) return; drag=false;
+      if(moved){ ghost?.remove(); ghost=null; Object.values(gEls).forEach(g=>g.classList.remove("hover"));
+        const el=document.elementFromPoint(e.clientX,e.clientY);
+        const over=el?.closest(".group"); const toPool=el?.closest(".pool");
+        if(over) moveTo(c,over.dataset.g); else if(toPool) moveTo(c,null);
+      } else {
+        const inGroup=c.parentElement.closest(".group");
+        if(selected===c){ c.classList.remove("sel"); selected=null; }
+        else if(selected && inGroup){ moveTo(selected, inGroup.dataset.g); }
+        else { if(selected) selected.classList.remove("sel"); selected=c; c.classList.add("sel"); }
+      } };
+    c.addEventListener("pointerup",end); c.addEventListener("pointercancel",e=>{ drag=false; ghost?.remove(); ghost=null; });
+    c.addEventListener("click",e=>e.stopPropagation());
+    pool.append(c);
+  });
+  pool.addEventListener("click",()=>{ if(selected&&!ctx.done) moveTo(selected,null); });
+  const chk=h("button",{class:"btn main",id:"check",onclick:()=>{
+    if(ctx.done) return;
+    if(Object.keys(place).length<t.items.length){ ctx.fb.className="fb bad"; ctx.fb.innerHTML=""; ctx.fb.append(h("b",null,"Сначала разложи все карточки 🙂")); return; }
+    const bad=t.items.filter(it=>place[it.t]!==it.g);
+    if(!bad.length){ groups.querySelectorAll(".chip").forEach(x=>x.classList.add("ok")); chk.disabled=true; ctx.success(); }
+    else { ctx.fail(); bad.forEach(it=>{ const c=groups.querySelector('.chip[data-t="'+it.t+'"]'); moveTo(c,null); c.classList.add("bad"); }); } }},"Проверить");
+  ctx.card.append(pool, groups, chk);
+ },
+ match(ctx){
+  const t=ctx.t; const grid=h("div",{class:"match"});
+  const L=t.pairs.map((p,i)=>({t:p[0],i})), R=shuffleNot(t.pairs.map((p,i)=>({t:p[1],i})));
+  const link={}; let selL=null; const lEls=[], rEls=[];
+  function paint(){ lEls.forEach(e=>e.className="btn"); rEls.forEach(e=>e.className="btn");
+    let k=0; for(const li in link){ const ri=link[li]; lEls[li].classList.add("pair"+k); rEls.find(e=>+e.dataset.i===ri).classList.add("pair"+k); k++; }
+    if(selL!==null) lEls[selL].classList.add("sel-b"); }
+  L.forEach((x,row)=>{
+    const lb=h("button",{class:"btn","data-side":"L","data-i":x.i,onclick:()=>{ if(ctx.done) return; selL = selL===x.i?null:x.i; delete link[x.i]; paint(); }},x.t);
+    lEls[x.i]=lb;
+    const r=R[row];
+    const rb=h("button",{class:"btn","data-side":"R","data-i":r.i,onclick:()=>{ if(ctx.done||selL===null) return;
+      for(const li in link) if(link[li]===r.i) delete link[li];
+      link[selL]=r.i; selL=null; paint(); }},r.t);
+    rEls.push(rb);
+    grid.append(lb, rb);
+  });
+  const chk=h("button",{class:"btn main",id:"check",onclick:()=>{
+    if(ctx.done) return;
+    if(Object.keys(link).length<t.pairs.length){ ctx.fb.className="fb bad"; ctx.fb.innerHTML=""; ctx.fb.append(h("b",null,"Соедини все пары 🙂")); return; }
+    const wrong=Object.keys(link).filter(li=>+li!==link[li]);
+    if(!wrong.length){ chk.disabled=true; ctx.success(); }
+    else { ctx.fail(); wrong.forEach(li=>delete link[li]); paint(); } }},"Проверить");
+  ctx.card.append(grid, chk);
+ }
+};
+function optionList(ctx, opts){
+  const box=h("div");
+  opts.forEach(o=>{ const b=h("button",{class:"btn opt","data-v":o,onclick:()=>{
+      if(ctx.done) return;
+      box.querySelectorAll(".btn").forEach(x=>x.classList.remove("bad"));
+      if(o===ctx.t.answer){ b.classList.add("ok"); ctx.success(); } else { b.classList.add("bad"); ctx.fail(); } }}, o);
+    box.append(b); });
+  ctx.card.append(box);
+}
+start();
+</script>
+</body>
+</html>
